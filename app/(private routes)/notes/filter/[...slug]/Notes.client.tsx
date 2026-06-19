@@ -6,15 +6,21 @@ import { useDebouncedCallback } from 'use-debounce';
 import toast, { Toaster } from 'react-hot-toast';
 import Link from 'next/link';
 
-import { fetchNotes } from '@/lib/api';
+import { fetchNotes } from '@/lib/api/clientApi';
 import NoteList from '@/components/NoteList/NoteList';
 import Pagination from '@/components/Pagination/Pagination';
 import SearchBox from '@/components/SearchBox/SearchBox';
 import Loader from '@/components/Loader/Loader';
 import css from './NotesPage.module.css';
+import { Note, NoteTag } from '@/types/note';
 
 interface NotesClientProps {
   initialTag?: string;
+}
+
+interface FetchNotesResponse {
+  notes: Note[];
+  totalPages: number;
 }
 
 export default function NotesClient({ initialTag = 'all' }: NotesClientProps) {
@@ -29,16 +35,18 @@ export default function NotesClient({ initialTag = 'all' }: NotesClientProps) {
   }, 500);
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['notes', searchKeyword, currentPage, initialTag],
+    queryKey: ['notes', { searchKeyword, currentPage, initialTag }],
     queryFn: () =>
       fetchNotes({
-        keyword: searchKeyword,
-        currentPage: currentPage,
-        itemsPerPage: NOTES_PER_PAGE,
-        ...(initialTag !== 'all' && { tag: initialTag }),
+        search: searchKeyword,
+        page: currentPage,
+        perPage: NOTES_PER_PAGE,
+        tag: initialTag as NoteTag | 'all',
       }),
     placeholderData: keepPreviousData,
   });
+
+  const serverData = data as FetchNotesResponse | undefined;
 
   useEffect(() => {
     if (isError) {
@@ -48,14 +56,13 @@ export default function NotesClient({ initialTag = 'all' }: NotesClientProps) {
     }
   }, [isError]);
 
-  const notesList = data?.notes || [];
-  const totalPages = data?.totalPages || 1;
+  const notesList = serverData?.notes || [];
+  const totalPages = serverData?.totalPages || 1;
 
   return (
     <div className={css.app}>
       <div className={css.toolbar}>
         <SearchBox onSearchChange={debouncedSearch} />
-
         {totalPages > 1 && (
           <Pagination
             totalPages={totalPages}
@@ -63,6 +70,7 @@ export default function NotesClient({ initialTag = 'all' }: NotesClientProps) {
             onPageChange={setCurrentPage}
           />
         )}
+
         <Link href="/notes/action/create" className={css.button}>
           Create note +
         </Link>

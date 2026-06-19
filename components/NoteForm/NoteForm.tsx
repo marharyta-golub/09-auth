@@ -4,8 +4,8 @@ import React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-
-import { createNote, type NewNoteProps } from '../../lib/api';
+import type { NewNoteProps } from '@/types/note';
+import { createNote } from '@/lib/api/clientApi';
 import { useNoteDraftStore } from '../../lib/store/noteStore';
 import css from './NoteForm.module.css';
 

@@ -15,6 +15,9 @@ const roboto = Roboto({
 export const metadata: Metadata = {
   title: 'NoteHub',
   description: 'Simple and efficient application for managing personal notes',
+  icons: {
+    icon: '/favicon.png',
+  },
   openGraph: {
     title: 'NoteHub',
     description: 'Simple and efficient application for managing personal notes',

@@ -4,8 +4,9 @@ import {
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
-import { fetchNotes } from '@/lib/api';
+import { fetchNotes } from '@/lib/api/serverApi';
 import NotesClient from './Notes.client';
+import { NoteTag } from '@/types/note';
 
 interface FilterNotesPageProps {
   params: Promise<{ slug?: string[] }>;
@@ -24,7 +25,7 @@ export async function generateMetadata({
     openGraph: {
       title: `${filterName} | NoteHub`,
       description: `Viewing notes filtered by category: ${filterName}.`,
-      url: `https://07-routing-nextjs-swart.vercel.app/notes/filter/${activeTag || 'all'}`,
+      url: `https://08-zustand-sandy-sigma.vercel.app/notes/filter/${activeTag || 'all'}`,
       images: [
         {
           url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
@@ -46,10 +47,9 @@ export default async function FilterNotesPage({
     queryKey: ['notes', activeTag || 'all'],
     queryFn: () =>
       fetchNotes({
-        keyword: '',
-        currentPage: 1,
-        itemsPerPage: 12,
-        ...(activeTag && { tag: activeTag }),
+        page: 1,
+        perPage: 12,
+        tag: (activeTag || 'all') as NoteTag | 'all',
       }),
   });
 
